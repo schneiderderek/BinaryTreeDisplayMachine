@@ -3,7 +3,7 @@ BinaryTreeDisplayMachine
 
 This class is used to create an ASCII display (to either an output file, or to the console) of a complete Binary Tree.
 
-Example output: 
+Example output (Complete Binary Tree of size 7): 
 
 
     
