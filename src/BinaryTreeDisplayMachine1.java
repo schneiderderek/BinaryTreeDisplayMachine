@@ -16,8 +16,7 @@ public final class BinaryTreeDisplayMachine1<T> implements
         BinaryTreeDisplayMachine<T> {
 
     /**
-     * The heap. Represented as generic T. By default it will be an
-     * {@code Array}
+     * The heap. Represented as an {@code Array<T>}
      * 
      * @requires T is of type BinaryTree || Array
      */
@@ -29,7 +28,7 @@ public final class BinaryTreeDisplayMachine1<T> implements
     private static final int defaultHeapSize = 20;
 
     /**
-     *
+     * The space reserved for nodes in the tree.
      */
     private static final int nodeSpace = 10;
 
@@ -56,8 +55,6 @@ public final class BinaryTreeDisplayMachine1<T> implements
         }
 
         this.totalHeight = determineHeightFromArray(this.tree);
-
-        System.out.println("Total Height = " + this.totalHeight);
     }
 
     /**
@@ -140,7 +137,7 @@ public final class BinaryTreeDisplayMachine1<T> implements
      * @param number
      *            The number of spaces to have in the {@code String}
      * 
-     * @return {@code String to be returned}
+     * @return {@code String} with the correct number of spaces
      */
     private static <T> String spaceBuilder(int number) {
         assert number >= 0 : "Violation of number >= 0";
@@ -170,7 +167,7 @@ public final class BinaryTreeDisplayMachine1<T> implements
      *         spacing
      */
     private static <T> String nodeFormater(T node) {
-        assert node != null : "Violation of node /= null";
+        assert node != null : "Violation of node != null";
 
         StringBuilder string = new StringBuilder();
 
@@ -203,18 +200,8 @@ public final class BinaryTreeDisplayMachine1<T> implements
         assert out != null : "Violation of out != null";
         assert out.isOpen() : "Violation of out is open";
 
-        // Display buffer for current row (this is the current height ^ 3
-        // String leftBufferSpace = this.spaceBuilder((int) Math.pow(
-        // this.totalHeight, 3) - 1);
-
         for (int leftMostRoot = 0, rowLevel = currentHeight; leftMostRoot < tree
                 .length(); leftMostRoot = 2 * leftMostRoot + 1, rowLevel--, currentHeight--) {
-            // out.println("Total Height = " + this.totalHeight);
-            // String leftBufferSpace = spaceBuilder((int) (1.5 * Math.pow(
-            // totalHeight, 3)) - 1);
-
-            // out.print(leftBufferSpace + " ");
-
             // Print out the nodes in the tree
             displayRowOfNodes(tree, out, leftMostRoot, rowLevel);
             out.println();
@@ -266,11 +253,15 @@ public final class BinaryTreeDisplayMachine1<T> implements
     }
 
     /**
+     * Determine the number of spaces needed for the correct amount of spacing
+     * between nodes of a specified height.
      * 
      * @param height
-     * @return
+     *            The height to determine the number of spaces for
+     * 
+     * @return {@code int} the number of spaces
      */
-    public static <T> int calculateBufferForHeight(int height) {
+    private static <T> int calculateBufferForHeight(int height) {
 
         if (height > 1) {
             return 2 * calculateBufferForHeight(height - 1) + 10;
