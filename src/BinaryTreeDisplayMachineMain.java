@@ -1,6 +1,12 @@
 import components.simplewriter.SimpleWriter;
 import components.simplewriter.SimpleWriter1L;
 
+/**
+ * Program to run BinaryTreeDisplayMachine examples on.
+ * 
+ * @author Derek Schneider
+ * 
+ */
 public class BinaryTreeDisplayMachineMain {
 
     /**
