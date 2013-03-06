@@ -1,5 +1,4 @@
 /**
- * Generates a .txt file in root project directory of the inputed heap.
  * 
  * @author Derek Schneider
  * 

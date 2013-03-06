@@ -92,6 +92,14 @@ public final class BinaryTreeDisplayMachine1<T> implements
         }
     }
 
+    /**
+     * Determines the height of the tree from an {@code Array}
+     * 
+     * @param array
+     *            Incoming {@code Array} to determine the height
+     * 
+     * @return {@code int} the height of the tree
+     */
     private static <T> int determineHeightFromArray(Array<T> array) {
         int height = 0;
 
@@ -325,6 +333,11 @@ public final class BinaryTreeDisplayMachine1<T> implements
         out.close();
     }
 
+    /**
+     * Returns the {@code String} representation of {@code this}.
+     * 
+     * @return {@code String} Representation of this.
+     */
     @Override
     public String toString() {
         return this.tree.toString();
