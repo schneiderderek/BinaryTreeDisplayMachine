@@ -30,7 +30,7 @@ public final class BinaryTreeDisplayMachine1<T> implements
     /**
      * The space reserved for nodes in the tree.
      */
-    private static final int nodeSpace = 10;
+    private int nodeSpace;
 
     /**
      * Total height of the tree
@@ -52,6 +52,12 @@ public final class BinaryTreeDisplayMachine1<T> implements
             // This is really bad... (Cast on cast)
             T entry = (T) (Integer) Math.abs((rnd.nextInt() * size));
             this.tree.setEntryAt(i, entry);
+            int currentLength = this.tree.entryAt(i).toString().length();
+
+            // Sets the nodeSpace to the longest string rep in the array
+            if (currentLength > this.nodeSpace) {
+                this.nodeSpace = currentLength;
+            }
         }
 
         this.totalHeight = determineHeightFromArray(this.tree);
@@ -67,6 +73,13 @@ public final class BinaryTreeDisplayMachine1<T> implements
         this.tree = new Array1L<T>(array.length());
 
         for (int i = 0; i < array.length(); i++) {
+            int currentLength = array.entryAt(i).toString().length();
+
+            // Sets the nodeSpace to the longest string rep in the array
+            if (currentLength > this.nodeSpace) {
+                this.nodeSpace = currentLength;
+            }
+
             this.tree.setEntryAt(i, array.entryAt(i));
         }
 
@@ -86,7 +99,7 @@ public final class BinaryTreeDisplayMachine1<T> implements
 
         this.buildArrayFromTree(this.tree, tree, 0);
 
-        if (tree.root().toString().length() > nodeSpace) {
+        if (tree.root().toString().length() > this.nodeSpace) {
             System.out.println("Warning, toString representation"
                     + " of nodes is greater than 10.");
         }
@@ -132,6 +145,13 @@ public final class BinaryTreeDisplayMachine1<T> implements
 
             array.setEntryAt(rootPos, treeRoot);
 
+            int currentLength = array.entryAt(rootPos).toString().length();
+
+            // Sets the nodeSpace to the longest string rep in the array
+            if (currentLength > this.nodeSpace) {
+                this.nodeSpace = currentLength;
+            }
+
             this.buildArrayFromTree(array, left, 2 * rootPos + 1);
             this.buildArrayFromTree(array, right, 2 * rootPos + 2);
 
@@ -174,7 +194,7 @@ public final class BinaryTreeDisplayMachine1<T> implements
      * @return {@code String} The formatted {@code String} with the correct
      *         spacing
      */
-    private static <T> String nodeFormater(T node) {
+    private static <T> String nodeFormater(T node, int nodeSpace) {
         assert node != null : "Violation of node != null";
 
         StringBuilder string = new StringBuilder();
@@ -203,7 +223,7 @@ public final class BinaryTreeDisplayMachine1<T> implements
      * @param root
      */
     private static <T> void displayTree(Array<T> tree, SimpleWriter out,
-            int currentHeight) {
+            int currentHeight, int nodeSpace) {
         assert tree != null : "Violation of tree != null";
         assert out != null : "Violation of out != null";
         assert out.isOpen() : "Violation of out is open";
@@ -211,9 +231,9 @@ public final class BinaryTreeDisplayMachine1<T> implements
         for (int leftMostRoot = 0, rowLevel = currentHeight; leftMostRoot < tree
                 .length(); leftMostRoot = 2 * leftMostRoot + 1, rowLevel--, currentHeight--) {
             // Print out the nodes in the tree
-            displayRowOfNodes(tree, out, leftMostRoot, rowLevel);
+            displayRowOfNodes(tree, out, leftMostRoot, rowLevel, nodeSpace);
             out.println();
-            displayRowOfBranches(out, leftMostRoot, rowLevel);
+            displayRowOfBranches(out, leftMostRoot, rowLevel, nodeSpace);
             out.println();
         }
     }
@@ -226,15 +246,18 @@ public final class BinaryTreeDisplayMachine1<T> implements
      * @param rowLevel
      */
     private static <T> void displayRowOfBranches(SimpleWriter out,
-            int leftMostNode, int height) {
+            int leftMostNode, int height, int nodeSpace) {
         assert out != null : "Violation of out != null";
         assert out.isOpen() : "Violation of out is open";
 
-        out.print(spaceBuilder(calculateBufferForHeight(height) - 1));
+        out.print(spaceBuilder(calculateBufferForHeight(height, nodeSpace) - 1));
 
         for (int i = leftMostNode; i <= (2 * leftMostNode); i++) {
-            out.print('/' + spaceBuilder(nodeSpace) + '\\'
-                    + spaceBuilder(calculateBufferForHeight(height + 1) - 2));
+            out.print('/'
+                    + spaceBuilder(nodeSpace)
+                    + '\\'
+                    + spaceBuilder(calculateBufferForHeight(height + 1,
+                            nodeSpace) - 2));
         }
     }
 
@@ -246,17 +269,18 @@ public final class BinaryTreeDisplayMachine1<T> implements
      * @param rowLevel
      */
     private static <T> void displayRowOfNodes(Array<T> tree, SimpleWriter out,
-            int leftMostRoot, int height) {
+            int leftMostRoot, int height, int nodeSpace) {
         assert tree != null : "Violation of tree != null";
         assert out != null : "Violation of out != null";
         assert out.isOpen() : "Violation of out is open";
 
-        out.print(spaceBuilder(calculateBufferForHeight(height)));
+        out.print(spaceBuilder(calculateBufferForHeight(height, nodeSpace)));
 
         // Print all of the nodes
         for (int i = leftMostRoot; i <= (leftMostRoot * 2); i++) {
-            out.print(nodeFormater(tree.entryAt(i))
-                    + spaceBuilder(calculateBufferForHeight(height + 1)));
+            out.print(nodeFormater(tree.entryAt(i), nodeSpace)
+                    + spaceBuilder(calculateBufferForHeight(height + 1,
+                            nodeSpace)));
         }
     }
 
@@ -269,10 +293,11 @@ public final class BinaryTreeDisplayMachine1<T> implements
      * 
      * @return {@code int} the number of spaces
      */
-    private static <T> int calculateBufferForHeight(int height) {
+    private static <T> int calculateBufferForHeight(int height, int nodeSpace) {
 
         if (height > 1) {
-            return 2 * calculateBufferForHeight(height - 1) + 10;
+            return 2 * calculateBufferForHeight(height - 1, nodeSpace)
+                    + nodeSpace;
         } else {
             return 1;
         }
@@ -319,18 +344,18 @@ public final class BinaryTreeDisplayMachine1<T> implements
 
         SimpleWriter out = new SimpleWriter1L(fileName);
 
-        displayTree(this.tree, out, this.totalHeight);
+        displayTree(this.tree, out, this.totalHeight, this.nodeSpace);
 
-        out.close();
+        // out.close();
     }
 
     @Override
     public void generateToConsole() {
         SimpleWriter out = new SimpleWriter1L();
 
-        displayTree(this.tree, out, this.totalHeight);
+        displayTree(this.tree, out, this.totalHeight, this.nodeSpace);
 
-        out.close();
+        // out.close();
     }
 
     /**
