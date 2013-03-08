@@ -160,29 +160,6 @@ public final class BinaryTreeDisplayMachine1<T> implements
     }
 
     /**
-     * Returns a string containing the number of spaces equal to {@code number}.
-     * 
-     * @param number
-     *            The number of spaces to have in the {@code String}
-     * 
-     * @return {@code String} with the correct number of spaces
-     */
-    private static <T> String spaceBuilder(int number) {
-        assert number >= 0 : "Violation of number >= 0";
-
-        StringBuilder string = new StringBuilder(number);
-
-        while (string.length() < number) {
-            string.insert(0, ' ');
-        }
-
-        // Because of the condition of the loop above, this is unlikely to fail.
-        assert string.length() == number : "Incorrect number of spaces.";
-
-        return new String(string);
-    }
-
-    /**
      * Adds blank spaces around the {@code toString()} of the incoming node. The
      * number of blank spaces added is:
      * {@code nodeSpace - node.toString().length()}. If this is an odd number,
@@ -250,14 +227,14 @@ public final class BinaryTreeDisplayMachine1<T> implements
         assert out != null : "Violation of out != null";
         assert out.isOpen() : "Violation of out is open";
 
-        out.print(spaceBuilder(calculateBufferForHeight(height, nodeSpace) - 1));
+        printSpaces(out, calculateBufferForHeight(height, nodeSpace) - 1);
 
         for (int i = leftMostNode; i <= (2 * leftMostNode); i++) {
-            out.print('/'
-                    + spaceBuilder(nodeSpace)
-                    + '\\'
-                    + spaceBuilder(calculateBufferForHeight(height + 1,
-                            nodeSpace) - 2));
+            out.print("/");
+            printSpaces(out, nodeSpace);
+            out.print("\\");
+            printSpaces(out,
+                    calculateBufferForHeight(height + 1, nodeSpace) - 2);
         }
     }
 
@@ -274,13 +251,13 @@ public final class BinaryTreeDisplayMachine1<T> implements
         assert out != null : "Violation of out != null";
         assert out.isOpen() : "Violation of out is open";
 
-        out.print(spaceBuilder(calculateBufferForHeight(height, nodeSpace)));
+        printSpaces(out, calculateBufferForHeight(height, nodeSpace));
 
         // Print all of the nodes
         for (int i = leftMostRoot; i <= (leftMostRoot * 2); i++) {
-            out.print(nodeFormater(tree.entryAt(i), nodeSpace)
-                    + spaceBuilder(calculateBufferForHeight(height + 1,
-                            nodeSpace)));
+            out.print(nodeFormater(tree.entryAt(i), nodeSpace));
+
+            printSpaces(out, calculateBufferForHeight(height + 1, nodeSpace));
         }
     }
 
@@ -304,6 +281,21 @@ public final class BinaryTreeDisplayMachine1<T> implements
     }
 
     /**
+     * Prints the number of spaces ' ' specified to the output stream
+     * 
+     * @param out
+     *            {@code SimpleWriter} output stream
+     * 
+     * @param number
+     *            number of spaces to print
+     */
+    private static void printSpaces(SimpleWriter out, int number) {
+        for (int i = 0; i < number; i++) {
+            out.print(" ");
+        }
+    }
+
+    /**
      * Generates a random complete {@code BinaryTree} of Default size.
      */
     public BinaryTreeDisplayMachine1() {
@@ -318,6 +310,7 @@ public final class BinaryTreeDisplayMachine1<T> implements
      *            Size of the random tree to be created
      */
     public BinaryTreeDisplayMachine1(int size) {
+        assert size > 0 : "Violation of size > 0";
         this.createNewRep(size);
     }
 
@@ -326,6 +319,8 @@ public final class BinaryTreeDisplayMachine1<T> implements
      * @param heap
      */
     public BinaryTreeDisplayMachine1(Array<T> heap) {
+        assert heap != null : "Violation of heap != null";
+
         this.createNewRep(heap);
     }
 
@@ -334,6 +329,8 @@ public final class BinaryTreeDisplayMachine1<T> implements
      * @param heap
      */
     public BinaryTreeDisplayMachine1(BinaryTree<T> heap) {
+        assert heap != null : "Violation of heap != null";
+
         this.createNewRep(heap);
     }
 
@@ -346,7 +343,7 @@ public final class BinaryTreeDisplayMachine1<T> implements
 
         displayTree(this.tree, out, this.totalHeight, this.nodeSpace);
 
-        // out.close();
+        out.close();
     }
 
     @Override
@@ -355,7 +352,7 @@ public final class BinaryTreeDisplayMachine1<T> implements
 
         displayTree(this.tree, out, this.totalHeight, this.nodeSpace);
 
-        // out.close();
+        out.close();
     }
 
     /**
