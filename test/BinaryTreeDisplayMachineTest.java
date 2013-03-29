@@ -11,7 +11,7 @@ public class BinaryTreeDisplayMachineTest {
 
         sw.start();
         BinaryTreeDisplayMachine<Integer> dis1 = new BinaryTreeDisplayMachine1<>(
-                255);
+                8191);
         sw.stop();
 
         System.out.println("Running time of const : " + sw.elapsed());
