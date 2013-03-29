@@ -372,7 +372,7 @@ public final class BinaryTreeDisplayMachine1<T> implements
         displayTree(this.tree, out, this.totalHeight, this.nodeSpace,
                 this.spaceBufferArray);
 
-        out.close();
+        // out.close();
     }
 
     @Override
@@ -382,7 +382,7 @@ public final class BinaryTreeDisplayMachine1<T> implements
         displayTree(this.tree, out, this.totalHeight, this.nodeSpace,
                 this.spaceBufferArray);
 
-        out.close();
+        // out.close();
     }
 
     /**
