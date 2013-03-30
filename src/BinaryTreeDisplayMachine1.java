@@ -10,6 +10,10 @@ import components.simplewriter.SimpleWriter1L;
  * 
  * @author Derek Schneider
  * 
+ *         Performance Notes: An {@code String} is used for the longest string
+ *         buffer because the substring method for {@code String} runs in
+ *         constant time and requires little additional memory
+ * 
  * @param <T>
  */
 public final class BinaryTreeDisplayMachine1<T> implements
@@ -38,9 +42,14 @@ public final class BinaryTreeDisplayMachine1<T> implements
     private int totalHeight;
 
     /**
-     * {@code Array} used to cache String buffer values
+     * {@code String} Used to cache the largest buffer space
      */
-    private String[] spaceBufferArray;
+    private String longestBuffer;
+
+    /**
+     * {@code Array} used to cache sizes for all of the buffers
+     */
+    private int[] bufferSizes;
 
     /**
      * {@code String} for a space
@@ -69,47 +78,42 @@ public final class BinaryTreeDisplayMachine1<T> implements
                 this.nodeSpace = currentLength;
             }
         }
-
-        this.totalHeight = determineHeightFromArray(this.tree);
-        this.spaceBufferArray = new String[this.totalHeight + 1];
     }
 
     /**
-     * Initializes the representation of BinaryTreeDisplayMachine.
-     * 
-     * @param array
-     *            Array to use for initialization
+     * @param {@code Array} Array representation of Binary Tree
      */
-    private void createNewRep(Array<T> array) {
-        this.tree = new Array1L<T>(array.length());
-
-        for (int i = 0; i < array.length(); i++) {
-            int currentLength = array.entryAt(i).toString().length();
-
-            // Sets the nodeSpace to the longest string rep in the array
-            if (currentLength > this.nodeSpace) {
-                this.nodeSpace = currentLength;
-            }
-
-            this.tree.setEntryAt(i, array.entryAt(i));
-        }
+    private void createPartialRep(Array<T> array) {
+        assert array != null : "Violation of array /= null";
 
         this.totalHeight = determineHeightFromArray(array);
-        this.spaceBufferArray = new String[this.totalHeight + 1];
+        this.longestBuffer = createLargestBufferString(this.totalHeight + 1,
+                this.nodeSpace);
+        this.bufferSizes = new int[this.totalHeight + 2];
     }
 
     /**
-     * Initializes the representation of BinaryTreeDisplayMachine.
+     * This will create a string of spaces, with the number of spaces equal to
+     * the max number of spaces needed for any buffer in the display generation
+     * process.
      * 
-     * @param tree
-     *            {@code BinaryTree} to use for initialization
+     * @param totalHeight
+     *            The total height of the tree
+     * @param nodeSpace
+     *            The amount of space reserved for each node
+     * @return {@code String} Returns the string of the biggest buffer needed to
+     *         print the Tree
      */
-    private void createNewRep(BinaryTree<T> tree) {
+    private static String createLargestBufferString(int totalHeight,
+            int nodeSpace) {
+        int length = calculateBufferForHeight(totalHeight, nodeSpace);
+        StringBuilder temp = new StringBuilder();
 
-        this.tree = new Array1L<T>(tree.size());
-        this.totalHeight = tree.height();
-        this.buildArrayFromTree(this.tree, tree, 0);
-        this.spaceBufferArray = new String[this.totalHeight + 1];
+        while (length > 0) {
+            temp.append(singleSpace);
+            length--;
+        }
+        return new String(temp);
     }
 
     /**
@@ -201,72 +205,77 @@ public final class BinaryTreeDisplayMachine1<T> implements
     }
 
     /**
+     * Prints an {@code Array} in tree form with nodes and branches.
      * 
-     * @param tree
      * @param out
-     * @param root
+     *            Output stream to write to (Must be open)
+     * @param currentHeight
+     *            The current height in the {@code Tree}
      */
-    private static <T> void displayTree(Array<T> tree, SimpleWriter out,
-            int currentHeight, int nodeSpace, String[] spaceBufferArray) {
-        assert tree != null : "Violation of tree != null";
+    private void displayTree(SimpleWriter out, int currentHeight) {
+        assert this.tree != null : "Violation of tree != null";
         assert out != null : "Violation of out != null";
         assert out.isOpen() : "Violation of out is open";
 
-        for (int leftMostRoot = 0, rowLevel = currentHeight; leftMostRoot < tree
+        for (int leftMostRoot = 0, rowLevel = currentHeight; leftMostRoot < this.tree
                 .length(); leftMostRoot = 2 * leftMostRoot + 1, rowLevel--, currentHeight--) {
             // Print out the nodes in the tree
-            displayRowOfNodes(tree, out, leftMostRoot, rowLevel, nodeSpace,
-                    spaceBufferArray);
+            this.displayRowOfNodes(out, leftMostRoot, rowLevel);
             out.println();
-            displayRowOfBranches(out, leftMostRoot, rowLevel, nodeSpace);
+            this.displayRowOfBranches(out, leftMostRoot, rowLevel);
             out.println();
         }
     }
 
     /**
      * Displays the row of branches corresponding to the current height of the
-     * tree
+     * tree.
      * 
      * @param out
+     *            Output stream (Must be open)
      * @param rowLevel
+     *            What row of the tree is being printed (This may be different
+     *            than the height of the tree).
      */
-    private static <T> void displayRowOfBranches(SimpleWriter out,
-            int leftMostNode, int height, int nodeSpace) {
+    private void displayRowOfBranches(SimpleWriter out, int leftMostNode,
+            int height) {
         assert out != null : "Violation of out != null";
         assert out.isOpen() : "Violation of out is open";
 
-        printSpaces(out, calculateBufferForHeight(height, nodeSpace) - 1);
+        this.printBufferForHeight(height, out, -1);
 
         for (int i = leftMostNode; i <= (2 * leftMostNode); i++) {
             out.print("/");
-            printSpaces(out, nodeSpace);
+            printSpaces(out, this.nodeSpace);
             out.print("\\");
-            printSpaces(out,
-                    calculateBufferForHeight(height + 1, nodeSpace) - 2);
+            this.printBufferForHeight(height + 1, out, -2);
         }
     }
 
     /**
+     * This will display a single row of properly formatted nodes, with correct
+     * spacing and buffering between each.
      * 
-     * @param tree
+     * @param height
+     *            Height of the tree to display the row of nodes for
      * @param out
+     *            Output stream (Must be open)
      * @param leftMostRoot
-     * @param rowLevel
+     *            Location of left most room in the current row
      */
-    private static <T> void displayRowOfNodes(Array<T> tree, SimpleWriter out,
-            int leftMostRoot, int height, int nodeSpace,
-            String[] spaceBufferArray) {
-        assert tree != null : "Violation of tree != null";
+    private void displayRowOfNodes(SimpleWriter out, int leftMostRoot,
+            int height) {
+        assert this.tree != null : "Violation of tree != null";
         assert out != null : "Violation of out != null";
         assert out.isOpen() : "Violation of out is open";
 
-        out.print(getBufferForHeight(height, nodeSpace, spaceBufferArray));
+        this.printBufferForHeight(height, out, 0);
 
         // Print all of the nodes
         for (int i = leftMostRoot; i <= (leftMostRoot * 2); i++) {
-            out.print(nodeFormater(tree.entryAt(i), nodeSpace));
+            out.print(nodeFormater(this.tree.entryAt(i), this.nodeSpace));
 
-            printSpaces(out, calculateBufferForHeight(height + 1, nodeSpace));
+            this.printBufferForHeight(height + 1, out, 0);
         }
     }
 
@@ -289,23 +298,25 @@ public final class BinaryTreeDisplayMachine1<T> implements
         }
     }
 
-    private static <T> String getBufferForHeight(int height, int nodeSpace,
-            String[] spaceBufferArray) {
+    /**
+     * 
+     * @param height
+     * @param out
+     */
+    private void printBufferForHeight(int height, SimpleWriter out, int offset) {
+        assert height != 0 : "Not a valid buffer space for height = 0";
 
-        if (spaceBufferArray[height] == null) {
-            // Need to build a String to corresponding height
-            int size = calculateBufferForHeight(height, nodeSpace);
-            StringBuilder buffer = new StringBuilder(0);
-
-            while (size > 0) {
-                buffer.append(singleSpace);
-                size--;
-            }
-
-            spaceBufferArray[height] = new String(buffer);
+        if (this.bufferSizes[height] == 0) {
+            this.bufferSizes[height] = calculateBufferForHeight(height,
+                    this.nodeSpace);
         }
 
-        return spaceBufferArray[height];
+        // Assert is placed here because this.bufferSizes[height] may be 0 and
+        // the assertion would not fail in the case that it should have
+        assert this.bufferSizes[height] + offset <= this.longestBuffer.length() : "Violation, substring larger than original.";
+
+        out.print(this.longestBuffer.substring(0, this.bufferSizes[height]
+                + offset));
     }
 
     /**
@@ -328,6 +339,7 @@ public final class BinaryTreeDisplayMachine1<T> implements
      */
     public BinaryTreeDisplayMachine1() {
         this.createNewRep(defaultHeapSize);
+        this.createPartialRep(this.tree);
     }
 
     /**
@@ -339,7 +351,9 @@ public final class BinaryTreeDisplayMachine1<T> implements
      */
     public BinaryTreeDisplayMachine1(int size) {
         assert size > 0 : "Violation of size > 0";
+
         this.createNewRep(size);
+        this.createPartialRep(this.tree);
     }
 
     /**
@@ -349,7 +363,20 @@ public final class BinaryTreeDisplayMachine1<T> implements
     public BinaryTreeDisplayMachine1(Array<T> heap) {
         assert heap != null : "Violation of heap != null";
 
-        this.createNewRep(heap);
+        this.tree = new Array1L<T>(heap.length());
+
+        for (int i = 0; i < heap.length(); i++) {
+            int currentLength = heap.entryAt(i).toString().length();
+
+            // Sets the nodeSpace to the longest string rep in the array
+            if (currentLength > this.nodeSpace) {
+                this.nodeSpace = currentLength;
+            }
+
+            this.tree.setEntryAt(i, heap.entryAt(i));
+        }
+
+        this.createPartialRep(this.tree);
     }
 
     /**
@@ -359,7 +386,10 @@ public final class BinaryTreeDisplayMachine1<T> implements
     public BinaryTreeDisplayMachine1(BinaryTree<T> heap) {
         assert heap != null : "Violation of heap != null";
 
-        this.createNewRep(heap);
+        this.tree = new Array1L<T>(heap.size());
+        this.buildArrayFromTree(this.tree, heap, 0);
+
+        this.createPartialRep(this.tree);
     }
 
     @Override
@@ -369,20 +399,18 @@ public final class BinaryTreeDisplayMachine1<T> implements
 
         SimpleWriter out = new SimpleWriter1L(fileName);
 
-        displayTree(this.tree, out, this.totalHeight, this.nodeSpace,
-                this.spaceBufferArray);
+        this.displayTree(out, this.totalHeight);
 
-        // out.close();
+        out.close();
     }
 
     @Override
     public void generateToConsole() {
         SimpleWriter out = new SimpleWriter1L();
 
-        displayTree(this.tree, out, this.totalHeight, this.nodeSpace,
-                this.spaceBufferArray);
+        this.displayTree(out, this.totalHeight);
 
-        // out.close();
+        out.close();
     }
 
     /**

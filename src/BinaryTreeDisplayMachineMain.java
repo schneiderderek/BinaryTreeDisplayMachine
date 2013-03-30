@@ -17,7 +17,7 @@ public class BinaryTreeDisplayMachineMain {
         SimpleWriter out = new SimpleWriter1L();
 
         BinaryTreeDisplayMachine<Integer> display = new BinaryTreeDisplayMachine1<Integer>(
-                15);
+                63);
 
         display.generateToConsole();
 
