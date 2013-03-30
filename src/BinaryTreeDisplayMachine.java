@@ -19,4 +19,11 @@ public interface BinaryTreeDisplayMachine<T> {
      * Generates an ASCII display of the {@code BinaryTree} to the console.
      */
     void generateToConsole();
+
+    /**
+     * Determine whether two objects are equal
+     * 
+     * @return whether they are equal
+     */
+    boolean equals();
 }

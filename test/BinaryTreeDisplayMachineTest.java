@@ -10,7 +10,9 @@ import components.simplewriter.SimpleWriter1L;
 import components.stopwatch.Stopwatch;
 import components.stopwatch.Stopwatch1;
 
-public class BinaryTreeDisplayMachineTest {
+public abstract class BinaryTreeDisplayMachineTest {
+    protected abstract BinaryTreeDisplayMachine<String> constructor();
+
     public static int current;
     public SimpleWriter out = new SimpleWriter1L("data/results.txt");
 

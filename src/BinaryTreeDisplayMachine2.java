@@ -1,8 +1,9 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import components.array.Array;
-import components.array.Array1L;
 import components.binarytree.BinaryTree;
-import components.random.Random;
-import components.random.Random1L;
 import components.simplewriter.SimpleWriter;
 import components.simplewriter.SimpleWriter1L;
 
@@ -10,8 +11,9 @@ import components.simplewriter.SimpleWriter1L;
  * 
  * @author Derek Schneider
  * 
- *         Note: This implementation is based on the OSU CSE components.jar
- *         library/package
+ * 
+ *         NOTE: This implementation is based on the Java Standard Libraries [Or
+ *         it will be after some time]
  * 
  *         Performance Notes: An {@code String} is used for the longest string
  *         buffer because the substring method for {@code String} runs in
@@ -21,7 +23,7 @@ import components.simplewriter.SimpleWriter1L;
  * 
  * @param <T>
  */
-public final class BinaryTreeDisplayMachine1<T> implements
+public final class BinaryTreeDisplayMachine2<T> implements
         BinaryTreeDisplayMachine<T> {
 
     /**
@@ -29,7 +31,7 @@ public final class BinaryTreeDisplayMachine1<T> implements
      * 
      * @requires T is of type BinaryTree || Array
      */
-    private Array<T> tree;
+    private List<T> tree;
 
     /**
      * Default Heap size.
@@ -69,14 +71,14 @@ public final class BinaryTreeDisplayMachine1<T> implements
      */
     @SuppressWarnings("unchecked")
     private void createNewRep(int size) {
-        this.tree = new Array1L<T>(size);
+        this.tree = new ArrayList<T>(size);
 
-        Random rnd = new Random1L();
+        Random rnd = new Random();
         for (int i = 0; i < size; i++) {
             // This is really bad... (Cast on cast)
             T entry = (T) (Integer) Math.abs((rnd.nextInt() * size));
-            this.tree.setEntryAt(i, entry);
-            int currentLength = this.tree.entryAt(i).toString().length();
+            this.tree.set(i, entry);
+            int currentLength = this.tree.get(i).toString().length();
 
             // Sets the nodeSpace to the longest string rep in the array
             if (currentLength > this.nodeSpace) {
@@ -88,7 +90,7 @@ public final class BinaryTreeDisplayMachine1<T> implements
     /**
      * @param {@code Array} Array representation of Binary Tree
      */
-    private void createPartialRep(Array<T> array) {
+    private void createPartialRep(List<T> array) {
         assert array != null : "Violation of array /= null";
 
         this.totalHeight = determineHeightFromArray(array);
@@ -129,10 +131,10 @@ public final class BinaryTreeDisplayMachine1<T> implements
      * 
      * @return {@code int} the height of the tree
      */
-    private static <T> int determineHeightFromArray(Array<T> array) {
+    private static <T> int determineHeightFromArray(List<T> array) {
         int height = 0;
 
-        for (int i = 0; i < array.length(); i = 2 * i + 1) {
+        for (int i = 0; i < array.size(); i = 2 * i + 1) {
             height++;
         }
 
@@ -151,7 +153,7 @@ public final class BinaryTreeDisplayMachine1<T> implements
      * @param rootPos
      *            The root of the current sub-tree
      */
-    private void buildArrayFromTree(Array<T> array, BinaryTree<T> t, int rootPos) {
+    private void buildArrayFromTree(List<T> array, BinaryTree<T> t, int rootPos) {
 
         if (t.size() > 0) {
             BinaryTree<T> left = t.newInstance();
@@ -159,9 +161,9 @@ public final class BinaryTreeDisplayMachine1<T> implements
 
             T treeRoot = t.disassemble(left, right);
 
-            array.setEntryAt(rootPos, treeRoot);
+            array.set(rootPos, treeRoot);
 
-            int currentLength = array.entryAt(rootPos).toString().length();
+            int currentLength = array.get(rootPos).toString().length();
 
             // Sets the nodeSpace to the longest string rep in the array
             if (currentLength > this.nodeSpace) {
@@ -223,7 +225,7 @@ public final class BinaryTreeDisplayMachine1<T> implements
         assert out.isOpen() : "Violation of out is open";
 
         for (int leftMostRoot = 0, rowLevel = currentHeight; leftMostRoot < this.tree
-                .length(); leftMostRoot = 2 * leftMostRoot + 1, rowLevel--, currentHeight--) {
+                .size(); leftMostRoot = 2 * leftMostRoot + 1, rowLevel--, currentHeight--) {
             // Print out the nodes in the tree
             this.displayRowOfNodes(out, leftMostRoot, rowLevel);
             out.println();
@@ -278,7 +280,7 @@ public final class BinaryTreeDisplayMachine1<T> implements
 
         // Print all of the nodes
         for (int i = leftMostRoot; i <= (leftMostRoot * 2); i++) {
-            out.print(nodeFormater(this.tree.entryAt(i), this.nodeSpace));
+            out.print(nodeFormater(this.tree.get(i), this.nodeSpace));
 
             this.printBufferForHeight(height + 1, out, 0);
         }
@@ -342,7 +344,7 @@ public final class BinaryTreeDisplayMachine1<T> implements
     /**
      * Generates a random complete {@code BinaryTree} of Default size.
      */
-    public BinaryTreeDisplayMachine1() {
+    public BinaryTreeDisplayMachine2() {
         this.createNewRep(defaultHeapSize);
         this.createPartialRep(this.tree);
     }
@@ -354,7 +356,7 @@ public final class BinaryTreeDisplayMachine1<T> implements
      * @param size
      *            Size of the random tree to be created
      */
-    public BinaryTreeDisplayMachine1(int size) {
+    public BinaryTreeDisplayMachine2(int size) {
         assert size > 0 : "Violation of size > 0";
 
         this.createNewRep(size);
@@ -365,10 +367,10 @@ public final class BinaryTreeDisplayMachine1<T> implements
      * 
      * @param heap
      */
-    public BinaryTreeDisplayMachine1(Array<T> heap) {
+    public BinaryTreeDisplayMachine2(Array<T> heap) {
         assert heap != null : "Violation of heap != null";
 
-        this.tree = new Array1L<T>(heap.length());
+        this.tree = new ArrayList<T>(heap.length());
 
         for (int i = 0; i < heap.length(); i++) {
             int currentLength = heap.entryAt(i).toString().length();
@@ -378,7 +380,7 @@ public final class BinaryTreeDisplayMachine1<T> implements
                 this.nodeSpace = currentLength;
             }
 
-            this.tree.setEntryAt(i, heap.entryAt(i));
+            this.tree.set(i, heap.entryAt(i));
         }
 
         this.createPartialRep(this.tree);
@@ -388,10 +390,10 @@ public final class BinaryTreeDisplayMachine1<T> implements
      * 
      * @param heap
      */
-    public BinaryTreeDisplayMachine1(BinaryTree<T> heap) {
+    public BinaryTreeDisplayMachine2(BinaryTree<T> heap) {
         assert heap != null : "Violation of heap != null";
 
-        this.tree = new Array1L<T>(heap.size());
+        this.tree = new ArrayList<T>(heap.size());
         this.buildArrayFromTree(this.tree, heap, 0);
 
         this.createPartialRep(this.tree);
